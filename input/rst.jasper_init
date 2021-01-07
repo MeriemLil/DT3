@@ -1,0 +1,10 @@
+rst_n 1'b0
+psel_in 1'b0
+penable_in 1'b0
+pwrite_in 1'b0
+paddr_in 32'b0
+pwdata_in 32'b0
+req_in 1'b0
+1
+rst_n 1
+$
