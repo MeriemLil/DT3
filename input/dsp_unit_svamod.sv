@@ -125,7 +125,7 @@ module dsp_unit_svamod(
    
    property f_max_latency;
       @(posedge clk) disable iff (rst_n == '0)
-	$rose(tick_in) |=> !valid_out [* 1:DSP_UNIT_MAX_LATENCY-1] ##1 valid_out
+	$rose(tick_in) |=> !valid_out [* 1:DSP_UNIT_MAX_LATENCY-1] ##1 valid_out;
    endproperty
 
    af_max_latency: assert property (f_max_latency)

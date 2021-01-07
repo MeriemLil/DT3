@@ -12,8 +12,8 @@ package audioport_pkg;
    localparam real CLK_PERIOD       = 17.5;
    localparam real MCLK_PERIOD      = 54.25347222; // Same for all students
 `endif
-   localparam int FILTER_TAPS          = 31;
-   localparam int AUDIO_BUFFER_SIZE    = 32;
+   localparam int FILTER_TAPS          = 47;
+   localparam int AUDIO_BUFFER_SIZE    = 42;
    localparam int CMD_WAIT_STATES      = 25; // Set manually to 6 + int'($ceil(6.0*MCLK_PERIOD/CLK_PERIOD)
 
    //////////////////////////////////////////////////////////////////
