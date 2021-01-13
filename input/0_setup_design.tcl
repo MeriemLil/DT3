@@ -4,9 +4,9 @@
 #
 ####################################################################
 
-source "input/0_setup_audioport.tcl"
+#source "input/0_setup_audioport.tcl"
 #source "input/0_setup_tlm_audioport.tcl"
-#source "input/0_setup_control_unit.tcl"
+source "input/0_setup_control_unit.tcl"
 #source "input/0_setup_i2s_unit.tcl"
 #source "input/0_setup_cdc_unit.tcl"
 #source "input/0_setup_dsp_unit.tcl"

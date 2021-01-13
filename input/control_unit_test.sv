@@ -100,6 +100,16 @@ program control_unit_test
 	      test_number = 2;
 	      test_status = 1;
 	      
+	      addr = LEVEL_REG_APB_ADDRESS;
+	      wdata = { 24'b00000000_0000000_00000000_001110, sample_rate};
+	      apb.write(addr, wdata, fail);	 
+	      apb.read(addr, rdata, fail);	     	     
+	      test_T2: assert ((wdata == rdata) && (wdata == level_reg_out))
+		else 
+		  begin
+		     $error("T2: LEVEL_REG write/read failure.");
+		     test_status = 0;
+		  end 
 
 	      if (test_status == 1) ++tests_passed; else ++tests_failed;
 	      
@@ -110,10 +120,22 @@ program control_unit_test
 	      $info("T3 DSP_REGS");
 	      test_number = 3;
 	      test_status = 1;
-	      
+
+	      addr = DSP_REG_START_APB_ADDRESS;
+	      wdata = { 24'b00000000_0000000_00000000_100010, sample_rate};
+	      for (int i = addr; i < addr + DSP_REGISTERS; i = i + 4)
+		 apb.write(i, wdata, fail);	 
+	         apb.read(i, rdata, fail);	     	     
+	         test_T3: assert ((wdata == rdata) && (wdata == dsp_regs_out))
+		 else 
+		  begin
+		     $error("T3: DSP_REG write/read failure.");
+		     test_status = 0;
+		  end
+	       end
 
 	      if (test_status == 1) ++tests_passed; else ++tests_failed;
-	      
+
 	      ////////////////////////////////////////////////////////////////
 	      // Test 4: Fill audio buffer
 	      ////////////////////////////////////////////////////////////////
@@ -122,6 +144,18 @@ program control_unit_test
 	      test_number = 4;
 	      test_status = 1;
 	      
+	      addr = ABUF_START_APB_ADDRESS;
+	      wdata = { 24'b00000000_0000000_00000000_000010, sample_rate};
+	      for (int i = addr; i < addr + AUDIO_BUFFER_SIZE; i = i + 4)
+		 apb.write(i, sample_number++, fail);	 
+	         apb.read(i, rdata, fail);	     	     
+	         test_T4: assert ((wdata == rdata) && (wdata == abuf_reg_out)) // abuf_reg_out?
+		 else 
+		  begin
+		     $error("T4: ABUF_REG write/read failure.");
+		     test_status = 0;
+		  end 
+	       end
 
 	      if (test_status == 1) ++tests_passed; else ++tests_failed;
 	      
@@ -133,6 +167,11 @@ program control_unit_test
 	      test_number = 5;
 	      test_done = 0;
 	      
+	      addr = CFG_REG_APB_ADDRESS;
+	      wdata = CMD_CFG;
+	      apb.write(addr, wdata, fail);	 
+	      //apb.read(addr, rdata, fail);	     	     
+	      
 
 	      wait (test_done == 1);
 	      
@@ -143,6 +182,11 @@ program control_unit_test
 	      $info("T6 CMD_LEVEL");	
 	      test_number = 6;
 	      test_done = 0;
+	      
+	      addr = LEVEL_REG_APB_ADDRESS;
+	      wdata = CMD_LEVEL;
+	      apb.write(addr, wdata, fail);	 
+	      //apb.read(addr, rdata, fail);	     	     
 	      
 
 	      wait (test_done == 1);
@@ -156,7 +200,10 @@ program control_unit_test
 	      test_done = 0;
 	      
 	      // To do: add APB write (command CMD_START to CMD_REG register)	      
-
+	      addr = CMD_REG_APB_ADDRESS;
+	      wdata = CMD_START;
+	      apb.write(addr, wdata, fail);	 
+	      //apb.read(addr, rdata, fail);
 
 	      // ------------------------------------------------------------		
 
@@ -197,6 +244,7 @@ program control_unit_test
 			  begin
 
 			     $info("T7.1.1: t7 = %d, irq_counter = %d", t7, irq_counter);
+				
 
 			     ////////////////////////////////////////////////////////////////
 			     // Fill the ABUF that just got empty
@@ -206,9 +254,35 @@ program control_unit_test
 			     // To do: Write 'sample_number' to ABUF0 or ABUF1 based on
 			     //        'current_abuf' value (0 = ABUF0, 1 = ABUF1) and
 			     //        increment 'sample_number' after each write.
-
-
-
+			     if (current_abuf == '0)
+				addr = ABUF0_START_APB_ADDRESS;
+	      			wdata = { 24'b00000000_0000000_00000000_000010, sample_rate};
+	      			for (int i = addr; i < addr + 2*AUDIO_BUFFER_SIZE; i = i + 4)
+		 		    apb.write(i, sample_number++, fail);	 
+	         		    apb.read(i, rdata, fail);	     	     
+	         		    test_T7: assert ((wdata == rdata) && (wdata == abuf_reg_out)) //abuf_reg_out?
+				    else 
+		 		      begin
+		    			 $error("T7.1.1: ABUF_REG write/read failure.");
+		     			 test_status = 0;
+		  		      end 
+	     		        end
+			     end
+			     else
+				addr = ABUF1_START_APB_ADDRESS;
+	      			wdata = { 24'b00000000_0000000_00000000_000010, sample_rate};
+	      			for (int i = addr; i < addr + 2*AUDIO_BUFFER_SIZE; i = i + 4)
+		 		    apb.write(i, sample_number++, fail);	 
+	         		    apb.read(i, rdata, fail);	     	     
+	         		    test_T7: assert ((wdata == rdata) && (wdata == abuf_reg_out)) //abuf_reg_out?
+				    else 
+		 		      begin
+		    			 $error("T7.1.1: ABUF_REG write/read failure.");
+		     			 test_status = 0;
+		  		      end 
+	     		        end
+			     end
+	                     if (test_status == 1) ++tests_passed; else ++tests_failed;
 
 			     // ------------------------------------------------------------				     
 			     
@@ -233,7 +307,10 @@ program control_unit_test
 		   $info("T7.2: CMD_STOP");
 		   
 		   // To do: Write CDM_STOP to CMD_REG register
-
+		   addr = CMD_REG_APB_ADDRESS;
+	      	   wdata = CMD_STOP;
+	      	   apb.write(addr, wdata, fail);	 
+	           //apb.read(addr, rdata, fail);
 
 		   // -----------------------------------------		
 
@@ -254,13 +331,20 @@ program control_unit_test
 		   $info("T7.3: sample rate = %h", sample_rate);
 
 		   // To do: Write sample rate code to CFG_REG
+		   addr = CMD_REG_APB_ADDRESS;
+	           wdata = sample_rate;
+	           apb.write(addr, wdata, fail);	 
+	           //apb.read(addr, rdata, fail);
 
 		   
 		   // -----------------------------------------		   	      		   
 
 		   // To do: Write sample CMD_CFG command to CMD_REG register
 
-
+		   addr = CMD_REG_APB_ADDRESS;
+	      	   wdata = CMD_CFG;
+	           apb.write(addr, wdata, fail);	 
+	           //apb.read(addr, rdata, fail);
 		   // -------------------------------------------------------
 		   
 		   ////////////////////////////////////////////////////////////////
@@ -277,7 +361,10 @@ program control_unit_test
 		   // To do: Write sample CMD_CLR command to CMD_REG register.
 		   //        Then read all ABUF registers to make sure that they are zero.
 		   
-
+		   addr = CMD_REG_APB_ADDRESS;
+	      	   wdata = CMD_CLR;
+	           apb.write(addr, wdata, fail);	 
+	           //apb.read(addr, rdata, fail);
 		   // -------------------------------------------------------
 
 		   
@@ -289,6 +376,23 @@ program control_unit_test
 
 		   // To do: Fill ABUF0 and ABUF1 completely with 'sample_number++'
 
+
+	           test_status = 1;
+	      
+	           addr = ABUF_REG_APB_ADDRESS;
+	           wdata = { 24'b00000000_0000000_00000000_000010, sample_rate};
+	           for (int i = addr; i < addr + ABUF_REGISTERS; i = i + 4)
+		 	apb.write(i, sample_number++, fail);	 
+	         	apb.read(i, rdata, fail);	     	     
+	         	test_T7.5: assert ((wdata == rdata) && (wdata == abuf_reg_out)) //abuf_reg_out?
+		 	else 
+		  	begin
+		     	$error("T7.5: ABUF_REG write/read failure.");
+		     	test_status = 0;
+		  	end 
+	       	   end
+
+	      if (test_status == 1) ++tests_passed; else ++tests_failed;
 		   
 		   // -------------------------------------------------------				   
 		   
@@ -299,7 +403,11 @@ program control_unit_test
 		   $info("T7.6: CMD_START");	     	     
 
 		   // To do: Write sample CMD_START command to CMD_REG register		   
-
+		   
+		   addr = CMD_REG_APB_ADDRESS;
+	      	   wdata = CMD_START;
+	           apb.write(addr, wdata, fail);	 
+	           //apb.read(addr, rdata, fail);
 
 		   // -------------------------------------------------------				   
 		   
@@ -318,7 +426,10 @@ program control_unit_test
 
 	      // To do: Write sample CMD_STOP command to CMD_REG register
 	      
-
+	      addr = CMD_REG_APB_ADDRESS;
+	      wdata = CMD_STOP;
+	      apb.write(addr, wdata, fail);	 
+	      //apb.read(addr, rdata, fail);
 	      // --------------------------------------------------------
 	      
 	      #10us;

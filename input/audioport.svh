@@ -22,7 +22,7 @@ timeprecision 1ps;
 
 // Enable assertion module bindings project-wide
 
-//`define INCLUDE_ASSERTIONS 1
+`define INCLUDE_ASSERTIONS 1
 
 `define xcheck(name) X_``name``: assert property ( @(posedge clk) disable iff (rst_n !== '1) !$isunknown( name ))
 `define xcheckm(name) X_``name``: assert property ( @(posedge mclk) disable iff (mrst_n !== '1) !$isunknown( name ))   
